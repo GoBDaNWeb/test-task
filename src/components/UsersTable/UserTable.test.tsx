@@ -1,0 +1,51 @@
+import axios from 'axios'
+import { render, screen } from '@testing-library/react';
+import App from '../../App'
+import {QueryClient, QueryClientProvider} from 'react-query'
+
+jest.mock('axios');
+
+describe('USER TABLE TEST', () => {
+    let response: any;
+    beforeEach(() => {
+        response = {
+            data: [
+                {
+                    "id": 1,
+                    "name": "Leanne Graham",
+                },
+                {
+                    "id": 2,
+                    "name": "Ervin Howell",
+                },
+                {
+                    "id": 3,
+                    "name": "Clementine Bauch",
+                },
+            ]
+        }
+    })
+    afterEach(() => {
+        jest.clearAllMocks();
+    })
+    test('renders users', async() => {
+        (axios.get as jest.Mock).mockResolvedValue(response);
+        const queryClient = new QueryClient({
+            defaultOptions:  {
+              queries: {
+                refetchOnWindowFocus: false
+              }
+            }
+          })
+          render(
+            <QueryClientProvider client={queryClient}>
+                <App />
+            </QueryClientProvider>
+          );
+        const users = await screen.findAllByTestId('user-item');
+        expect(users.length).toBe(3);
+        expect(axios.get).toBeCalledTimes(1);
+        screen.debug();
+    });
+
+})
